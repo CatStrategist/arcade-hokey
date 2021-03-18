@@ -28,6 +28,7 @@ uint8_t engine_photocell_prev;
 uint8_t coin_drop_prev;
 
 bool isEnginedTurnedOn = false;
+bool shouldPassBall = false;
 
 GameState gameState = GameState::Idle;
 
@@ -84,7 +85,7 @@ void preparingLoop()
     playerTwoPoints = 0;
     gameEndTimeMs = millis() + GAME_TIME_MS;
     gameState = GameState::Game;
-    isEnginedTurnedOn = false;
+    shouldPassBall = true;
     digitalWrite(HOCKEY_PLAYERS_OUTPUT_PIN, HIGH);
 }
 
@@ -94,21 +95,24 @@ void gameLoop()
     uint8_t player_two_photocell = digitalRead(PLAYER_TWO_PHOTOCELL_PIN);
     uint8_t engine_photocell = digitalRead(ENGINE_PHOTOCELL_PIN);
 
-    if (!isEnginedTurnedOn)
+    if (!isEnginedTurnedOn && shouldPassBall)
     {
         digitalWrite(ENGINE_OUTPUT_PIN, HIGH);
         isEnginedTurnedOn = true;
+        shouldPassBall = false;
     }
 
     // we call your update function when the button was low and is now high: a.k.a. falling edge
     if (player_one_photocell == LOW && player_one_photocell_prev == HIGH)
     {
         playerOnePoints++;
+        shouldPassBall = true;
     }
 
     if (player_two_photocell == LOW && player_two_photocell_prev == HIGH)
     {
         playerTwoPoints++;
+        shouldPassBall = true;
     }
 
     if (engine_photocell == HIGH && engine_photocell_prev == LOW)
@@ -121,7 +125,7 @@ void gameLoop()
     player_two_photocell_prev = player_two_photocell;
     engine_photocell_prev = engine_photocell;
 
-    if (millis() > gameEndTimeMs)
+    if (millis() > gameEndTimeMs && !isEnginedTurnedOn)
     {
         gameState = GameState::Ending;
     }
@@ -130,6 +134,10 @@ void gameLoop()
 void endingLoop()
 {
     digitalWrite(HOCKEY_PLAYERS_OUTPUT_PIN, LOW);
+
+    digitalWrite(ENGINE_OUTPUT_PIN, LOW);
+    isEnginedTurnedOn = false;
+
     uint8_t player_one_photocell_prev = LOW;
     uint8_t player_two_photocell_prev = LOW;
     uint8_t engine_photocell_prev = LOW;
