@@ -14,9 +14,9 @@ const uint8_t COIN_DROPPED_SIG_PIN = 9;
 const uint8_t ENGINE_OUTPUT_PIN = 8;
 const uint8_t HOCKEY_PLAYERS_OUTPUT_PIN = 7;
 
-const float GAME_TIME_MS = 150000;
+const unsigned long GAME_TIME_MS = 150000;
 
-unsigned long int gameEndTimeMs = 0;
+unsigned long gameEndTimeMs = 0;
 unsigned short int credits = 0;
 
 unsigned short int playerOnePoints = 0;
